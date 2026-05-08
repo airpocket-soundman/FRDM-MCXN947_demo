@@ -16,7 +16,7 @@
 
 1. **SDK パスは環境変数 `MCUXSDK_DIR` 経由で参照する。** ハードコードされた `D:/GitHub/...` や `C:/Users/<name>/...` を絶対に書かない。
 2. **VS Code / CMake の正本は [.vscode/settings.json](.vscode/settings.json) の `cmake.configureArgs`** (env var で書かれている)。これがあらゆる preset レイヤより優先されるよう構成済み。
-3. **MCUXpresso 拡張が機械固有パスで上書きするファイル** (`<NN>_<sample>/.vscode/mcuxpresso-tools.json` の `sdk.path`、`<NN>_<sample>/mcux_include.json` の `environment` ブロック等) はコミット時に env var プレースホルダ化する。詳細は [取り込み後に必ずやる "ローカル化" 作業](#取り込み後に必ずやる-ローカル化-作業) を参照。
+3. **MCUXpresso 拡張が機械固有パスで書き戻すファイル** (`<NN>_<sample>/.vscode/mcuxpresso-tools.json`、`<NN>_<sample>/mcux_include.json`) は **両方とも `.gitignore` 済みの per-machine 扱い** で、コミット対象外。CMake configure 用の env / cache var の正本は `<NN>_<sample>/CMakePresets.json` (env var sanitize 済み inline 定義) と [.vscode/settings.json](.vscode/settings.json) の `cmake.configureArgs`。詳細は [取り込み後に必ずやる "ローカル化" 作業](#取り込み後に必ずやる-ローカル化-作業) を参照。
 4. **machine-local な上書きが必要なら `.vscode/settings.local.json`** に書く (`.gitignore` 済み)。共通設定 (`settings.json`) には触らない。
 
 ---
@@ -108,9 +108,9 @@ MCUXpresso for VS Code の Import Example (Freestanding) が生成する物理�
 MCUXpresso for VS Code の Import Example (Freestanding) 直後、**そのままだとローカル絶対パスを含んでいる**。**コミット前に必ず以下を実施**。
 
 > **SDK 26.6.0 + Freestanding import 時点の状況** (2026-05 確認):
-> - 項目 1 (`mcuxpresso-tools.json` の `projectType`) → 自動で `sdk-v2-freestanding` になる。確認のみで OK
+> - 項目 1 (`mcuxpresso-tools.json` の `projectType`) → 自動で `sdk-v2-freestanding` になる。確認のみで OK (ファイル自体は `.gitignore` 済み)
 > - 項目 2 (`<NN>_<sample>/prj.conf`) → 標準サンプル (`hello_world`, `led_blinky_peripheral`, `tflm_label_image`) では自動生成される。古い SDK や一部サンプルで欠ける場合のみ集約が必要
-> - 項目 3 (`mcux_include.json` のローカル絶対パス) → **必ず手動 sanitize が必要**。下記参照
+> - 項目 3 (`mcux_include.json` の中身を `CMakePresets.json` に inline 化) → **必ず手動で実施**。`mcux_include.json` 自体は `.gitignore` 済みだが、SDK 由来の `CMakePresets.json` が `include: mcux_include.json` を参照したままだと、新規 clone した人がファイル不在で configure 失敗する。下記参照
 
 ### 1. `<NN>_<sample>/.vscode/mcuxpresso-tools.json` の `projectType` を確認
 
@@ -142,7 +142,7 @@ PROJECTS パネルでバッジが「**MCUXpresso SDK 26.x.x**」と「**CMake**�
 }
 ```
 
-> `${env:MCUXSDK_DIR}` を MCUXpresso 拡張がそのまま受け付けない場合がある。その時は **`mcuxpresso-tools.json` を `.gitignore` に入れて per-machine 扱い** にし、CMake 引数オーバーライド ([.vscode/settings.json](.vscode/settings.json)) を正本とする。
+> **このレポでは `mcuxpresso-tools.json` を最初から `.gitignore` 行きにしている** (MCUXpresso 拡張が `${env:MCUXSDK_DIR}` を絶対パスへ書き戻し続けるため)。なので新規取り込み直後の `sdk.path` がローカル絶対パス (`d:\\...`) になっていても sanitize は不要 — 中身は確認するだけで OK。CMake configure の正本は [.vscode/settings.json](.vscode/settings.json) の `cmake.configureArgs` (`-DSdkRootDirPath=${env:MCUXSDK_DIR}/mcuxsdk` 等) と `<NN>_<sample>/CMakePresets.json` (下記項目 3 で inline 化する env)。
 
 ### 2. `<NN>_<sample>/prj.conf` の存在を確認 (無ければ作る)
 
@@ -164,38 +164,27 @@ CONFIG_MCUX_PRJSEG_module.board.pinmux_project_folder=y
 
 > SDK 26.6.0 の Freestanding import では `00_hello_world`, `10_led_blinky_peripheral`, `20_tflm_label_image` のいずれも app-level `prj.conf` が自動生成されることを確認済み。古い SDK や別系統のサンプルで欠ける場合のみこの集約が必要。
 
-### 3. `<NN>_<sample>/mcux_include.json` のローカル絶対パス sanitize **(コミット前必須)**
+### 3. `<NN>_<sample>/mcux_include.json` の中身を `CMakePresets.json` に inline 化 **(取り込み直後必須)**
 
-Freestanding import 直後、`<sample>/mcux_include.json` の `debug-env` / `release-env` 内に **ローカル絶対パスがハードコード** される (例: `C:/Users/<your_user>/.mcuxpressotools/...`、`c:/Users/<your_user>/Documents/mcuxsdk`)。これをそのままコミットすると、他人 / 他マシンで build できなくなる。
+Freestanding import 直後、SDK は `mcux_include.json` という **ローカル絶対パスがハードコードされた env 定義ファイル**を生成し、`CMakePresets.json` から `include: mcux_include.json` で読み込ませる構造になっている。`mcux_include.json` 自体は `.gitignore` 済みなので、そのまま放置すると **新規 clone した人が `mcux_include.json` 不在で `cmake --preset debug` できない**。
 
-**Sanitize 内容** (CMake preset の env var 構文 `$env{...}` を使う):
+そこで取り込み直後に **`mcux_include.json` の `debug-env` / `release-env` の中身を `CMakePresets.json` の `configurePresets` に直接書き写し**、`include` 行を削除する。コピーする際に env var 形式に sanitize する:
 
 | Before (絶対パス) | After (env var) |
 | --- | --- |
 | `C:/Users/<you>/.mcuxpressotools` | `$env{USERPROFILE}/.mcuxpressotools` |
-| `c:/Users/<you>/Documents/mcuxsdk` | `$env{MCUXSDK_DIR}` |
+| `c:/Users/<you>/Documents/mcuxsdk` (SDK ルート) | `$env{MCUXSDK_DIR}` |
 
-PowerShell でまとめてやる場合 (取り込み直後・コミット前に実行):
+完成後の `CMakePresets.json` は `00_hello_world/CMakePresets.json` を参照(`debug-env` / `release-env` を hidden preset として inline、末尾の `"include": [...]` は削除されている)。
 
-```powershell
-# レポルートで
-Get-ChildItem -Path . -Filter mcux_include.json -Recurse | ForEach-Object {
-    $c = Get-Content $_.FullName -Raw
-    # 自分のユーザ名で置き換える (USERPROFILE は env var 展開で動的に解決される)
-    $c = $c -replace [regex]::Escape("$env:USERPROFILE\.mcuxpressotools".Replace('\','/')), '$env{USERPROFILE}/.mcuxpressotools'
-    $c = $c -replace [regex]::Escape($env:MCUXSDK_DIR), '$env{MCUXSDK_DIR}'
-    [System.IO.File]::WriteAllText($_.FullName, $c, (New-Object System.Text.UTF8Encoding $false))
-    Write-Host "Sanitized: $($_.FullName)"
-}
-```
-
-**保険として** [.vscode/settings.json](.vscode/settings.json) にワークスペース全体の `cmake.configureArgs` で同じ変数を `-D` 上書きしている。万が一 `mcux_include.json` の値が古い / 壊れた状態 (拡張が `SdkRootDirPath` を空文字に正規化することがある) でも、CMake は同じ `-DVAR=...` が複数ある場合 **最後の値** を採用するため、ワークスペース設定で救える。
+**保険として** [.vscode/settings.json](.vscode/settings.json) にワークスペース全体の `cmake.configureArgs` で `-DSdkRootDirPath=${env:MCUXSDK_DIR}/mcuxsdk` を `-D` 上書きしている。仮に拡張が `mcux_include.json` を再生成して古い値で書き戻しても、CMake は同じ `-DVAR=...` が複数ある場合 **最後の値** を採用するため、ワークスペース設定で救える(ただし `mcux_include.json` は gitignored なので、ローカルで build する分にしか影響しない)。
 
 **ビルドが通らない時のチェックリスト**:
 
 1. `pwsh -File scripts/setup.ps1` を実行して `MCUXSDK_DIR` を設定済みか / VS Code を再起動済みか
 2. `<sample>/debug/` (古い CMakeCache) を削除して再 Configure (キャッシュが効いて修正が反映されない件)
 3. configure ログの末尾が `-DSdkRootDirPath=<MCUXSDK_DIR>/mcuxsdk -DCMAKE_TOOLCHAIN_FILE=<MCUXSDK_DIR>/mcuxsdk/cmake/toolchain/armgcc.cmake` で締められていて `-- Build files have been written to:` が出れば正常
+4. VS Code の `CMake: build` タスクは `CMake: configure` に **依存していない** (tasks.json に `dependsOn` が無い)。`debug/` が空なら build は `no such file or directory` で死ぬ。先に `CMake: configure` を一度走らせる
 
 ---
 
@@ -232,8 +221,8 @@ Get-ChildItem -Path . -Filter mcux_include.json -Recurse | ForEach-Object {
 
 ## やってはいけないこと
 
-- **コミット前に絶対パスをチェック**: `D:/`, `C:/Users/`, `/home/` といった文字列が `.vscode/`, `<NN>_<sample>/`, `frdmmcxn947_cm33_core0/` 配下に紛れていないか確認(特に `mcux_include.json`)
+- **コミット前に絶対パスをチェック**: `D:/`, `C:/Users/`, `/home/` といった文字列が `.vscode/`, `<NN>_<sample>/`, `frdmmcxn947_cm33_core0/` 配下にコミット対象として紛れていないか確認(`mcuxpresso-tools.json` / `mcux_include.json` は `.gitignore` 済みなので対象外)
 - **`.vscode/settings.local.json` をコミットしない** (`.gitignore` 済み)
-- **MCUXpresso 拡張が `mcuxpresso-tools.json` を書き戻した直後にそのままコミットしない**: 必ず `${env:MCUXSDK_DIR}` 化するか、`.gitignore` で除外する判断をする
+- **`<NN>_<sample>/CMakePresets.json` から `mcux_include.json` を再 include しない**: 取り込み直後の SDK 既定構造に戻すと、`mcux_include.json` が gitignored の関係で新規 clone した人がビルドできなくなる。env は CMakePresets.json 内に inline で持つ
 - **Repository application を使わない**: 編集が build に反映されない / SDK パス依存が残る。原本も改造版も Freestanding で取り込む
 - **`debug/`, `release/`, `flash_debug/`, `*.elf`, `*.bin`, `*.hex` をコミットしない** (`.gitignore` 済み)

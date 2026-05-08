@@ -19,11 +19,35 @@
   "//git": "MCUXpresso 拡張が各サンプル直下に作る __repo__/ には mcuxsdk / manifests のローカルクローンが入る。これを VS Code のソース管理が拾わないよう、サブフォルダのレポ自動検出を切る (ワークスペース直下のレポだけ表示)。",
   "git.autoRepositoryDetection": "openEditors",
 
+  "//exclude": "MCUXpresso 拡張がワークスペース内に作りうる west / SDK 由来フォルダを 3 層で隔離する: files.exclude (Explorer 非表示) + search.exclude (検索対象外) + files.watcherExclude (FSWatcher 対象外で I/O 軽減)。.gitignore とセットで運用。",
   "files.exclude": {
     "**/debug": true,
     "**/release": true,
     "**/flash_debug": true,
     "**/flash_release": true,
-    "**/__repo__": true
+    "**/__repo__": true,
+    "**/mcuxsdk": true,
+    "**/manifests": true,
+    "**/.west": true
+  },
+  "search.exclude": {
+    "**/debug": true,
+    "**/release": true,
+    "**/flash_debug": true,
+    "**/flash_release": true,
+    "**/__repo__": true,
+    "**/mcuxsdk": true,
+    "**/manifests": true,
+    "**/.west": true
+  },
+  "files.watcherExclude": {
+    "**/debug/**": true,
+    "**/release/**": true,
+    "**/flash_debug/**": true,
+    "**/flash_release/**": true,
+    "**/__repo__/**": true,
+    "**/mcuxsdk/**": true,
+    "**/manifests/**": true,
+    "**/.west/**": true
   }
 }

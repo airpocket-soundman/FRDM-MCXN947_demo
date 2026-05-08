@@ -30,10 +30,19 @@
 # MCUXpresso extension scratch
 .mcuxpresso/
 
+# MCUXpresso for VS Code が機械固有パス (SDK ルート / toolchain 配下) を都度書き戻すため
+# per-machine 扱いにする (CLAUDE.md 項目 1)。CMake 設定の正本は各 sample の
+# CMakePresets.json (env var 化済み) と .vscode/settings.json の cmake.configureArgs。
+**/.vscode/mcuxpresso-tools.json
+**/mcux_include.json
+
 # MCUXpresso拡張がサンプル直下に作る west ワークスペースのローカルクローン
 # (manifests / mcuxsdk のコピーが入る。SDK 本体は MCUXSDK_DIR 経由で参照する想定なので
 #  各サンプル内に複製する必要は無い。サイズも数 GB になるので絶対にコミットしない)
 **/__repo__/
+**/mcuxsdk/
+**/manifests/
+**/.west/
 
 # OS / editor cruft
 .DS_Store

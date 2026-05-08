@@ -86,7 +86,7 @@ FRDM-MCXN947_demo/
 このレポを **どのマシンでも clone 直後に動かせる** ようにするための約束事:
 
 1. **SDK の絶対パスは環境変数 `MCUXSDK_DIR` 経由でのみ参照する。** ハードコードされた `D:/GitHub/...` や `C:/Users/<name>/...` を `.vscode/`, `CMakeLists.txt`, スクリプトに書かない。
-2. **MCUXpresso 拡張が機械固有の絶対パスを書き戻すファイル** (各サンプルの `<NN>_<sample>/.vscode/mcuxpresso-tools.json` の `sdk.path` や `<NN>_<sample>/mcux_include.json` の環境ブロック) はコミット時に env var プレースホルダ化する (詳細手順は [CLAUDE.md](./CLAUDE.md#3-nn_samplemcux_includejson-のローカル絶対パス-sanitize-コミット前必須) 参照)。CMake 引数の正本は [.vscode/settings.json](.vscode/settings.json) の `cmake.configureArgs` (env var 展開) 側に置く。
+2. **MCUXpresso 拡張が機械固有パスを書き戻すファイル** (各サンプルの `<NN>_<sample>/.vscode/mcuxpresso-tools.json` と `<NN>_<sample>/mcux_include.json`) は **両方とも `.gitignore` 済みの per-machine 扱い**。CMake configure 用の env / cache var の正本は `<NN>_<sample>/CMakePresets.json` (env var sanitize 済み inline 定義) と [.vscode/settings.json](.vscode/settings.json) の `cmake.configureArgs`。新規取り込み時の対応手順は [CLAUDE.md](./CLAUDE.md#3-nn_samplemcux_includejson-の中身を-cmakepresetsjson-に-inline-化-取り込み直後必須) を参照。
 3. **ツールチェーン (`ARMGCC_DIR`) は MCUXpresso Installer の標準パス** (`~/.mcuxpressotools/...`) に揃える。別場所にインストールしている人は `MCUXSDK_DIR` と同じ仕組みで env var (例 `ARMGCC_DIR`) を別途設定する想定。
 4. **per-machine の上書きが必要になった場合は `.vscode/settings.local.json`** に書く (`.gitignore` 済み)。VS Code は両方をマージするので、共通設定はそのまま、個別事情だけローカルに逃がせる。
 
