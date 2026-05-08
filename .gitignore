@@ -1,0 +1,42 @@
+# Build outputs
+**/debug/
+**/release/
+**/build/
+**/flash_debug/
+**/flash_release/
+**/cmake-build-*/
+**/*.elf
+**/*.bin
+**/*.hex
+**/*.map
+**/*.lst
+**/*.o
+**/*.obj
+**/*.d
+**/*.axf
+
+# CMake
+**/CMakeCache.txt
+**/CMakeFiles/
+**/cmake_install.cmake
+**/CMakeUserPresets.json
+
+# VS Code per-machine overrides
+.vscode/settings.local.json
+.vscode/launch.local.json
+.vscode/.cmaketools.json
+.vscode/.ropeproject/
+
+# MCUXpresso extension scratch
+.mcuxpresso/
+
+# MCUXpresso拡張がサンプル直下に作る west ワークスペースのローカルクローン
+# (manifests / mcuxsdk のコピーが入る。SDK 本体は MCUXSDK_DIR 経由で参照する想定なので
+#  各サンプル内に複製する必要は無い。サイズも数 GB になるので絶対にコミットしない)
+**/__repo__/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~

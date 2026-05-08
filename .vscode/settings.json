@@ -1,0 +1,25 @@
+{
+  "//": "Per-machine SDK path is read from the MCUXSDK_DIR environment variable. Run scripts/setup.ps1 once on a fresh checkout.",
+
+  "cmake.configureArgs": [
+    "-DSdkRootDirPath=${env:MCUXSDK_DIR}/mcuxsdk",
+    "-DCMAKE_TOOLCHAIN_FILE=${env:MCUXSDK_DIR}/mcuxsdk/cmake/toolchain/armgcc.cmake"
+  ],
+  "cmake.environment": {
+    "SdkRootDirPath": "${env:MCUXSDK_DIR}"
+  },
+
+  "files.associations": {
+    "*.ld": "linkerscript",
+    "*.mex": "xml",
+    "mcux_include.json": "jsonc",
+    "mcuxpresso-tools.json": "jsonc"
+  },
+
+  "files.exclude": {
+    "**/debug": true,
+    "**/release": true,
+    "**/flash_debug": true,
+    "**/flash_release": true
+  }
+}
