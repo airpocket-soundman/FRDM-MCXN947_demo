@@ -108,8 +108,13 @@ void BOARD_InitPins(void)
     /* PORT0_2 (pin B16) is configured as SWO */
     PORT_SetPinConfig(PORT0, 2U, &port0_2_pinB16_config);
 
-    /* Enable PORT1 clock (BLUE LED is on PORT1) */
+    /* Enable PORT1 clock (BLUE LED is on PORT1) and GPIO0/GPIO1 clocks.
+     * MCXN947 has separate clock gates for PORT (pin mux) and GPIO (pin
+     * direction/output). Without GPIO1 clock, PORT1_2 = BLUE can't drive
+     * its output even after PDDR is set. */
     CLOCK_EnableClock(kCLOCK_Port1);
+    CLOCK_EnableClock(kCLOCK_Gpio0);
+    CLOCK_EnableClock(kCLOCK_Gpio1);
 
     /* GREEN (PORT0_27) / BLUE (PORT1_2) : GPIO output, no pull. */
     const port_pin_config_t led_gpio_out_config = {.pullSelect          = kPORT_PullDisable,
