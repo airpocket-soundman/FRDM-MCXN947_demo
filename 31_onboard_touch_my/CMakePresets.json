@@ -1,0 +1,96 @@
+{
+  "version": 7,
+  "cmakeMinimumRequired": {
+    "major": 3
+  },
+  "configurePresets": [
+    {
+      "name": "debug-env",
+      "displayName": "debug-env",
+      "hidden": true,
+      "environment": {
+        "ARMGCC_DIR": "C:/Users/yamashita_y00031/.mcuxpressotools/arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi",
+        "SdkRootDirPath": "d:/workspace/sdks/mcuxsdk",
+        "MCUX_VENV_PATH": "C:/Users/yamashita_y00031/.mcuxpressotools/.mcux-venv-3.12/Scripts",
+        "PATH": "$env{MCUX_VENV_PATH}${pathListSep}$penv{PATH}",
+        "POSTPROCESS_UTILITY": "C:/Users/yamashita_y00031/.mcuxpressotools/mcux-fixelf-14.2.2/mcux-fixelf.exe",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "cacheVariables": {}
+    },
+    {
+      "name": "release-env",
+      "displayName": "release-env",
+      "hidden": true,
+      "environment": {
+        "ARMGCC_DIR": "C:/Users/yamashita_y00031/.mcuxpressotools/arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi",
+        "SdkRootDirPath": "d:/workspace/sdks/mcuxsdk",
+        "MCUX_VENV_PATH": "$env{USERPROFILE}/.mcuxpressotools/.mcux-venv-3.12/Scripts",
+        "PATH": "$env{MCUX_VENV_PATH}${pathListSep}$penv{PATH}",
+        "POSTPROCESS_UTILITY": "C:/Users/yamashita_y00031/.mcuxpressotools/mcux-fixelf-14.2.2/mcux-fixelf.exe",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "cacheVariables": {}
+    },
+    {
+      "name": "debug",
+      "displayName": "debug",
+      "generator": "Ninja",
+      "binaryDir": "${fileDir}//${presetName}",
+      "toolchainFile": "$env{SdkRootDirPath}/mcuxsdk/cmake/toolchain/armgcc.cmake",
+      "inherits": "debug-env",
+      "cacheVariables": {
+        "APP_DIR": {
+          "value": "${fileDir}",
+          "type": "PATH"
+        },
+        "CMAKE_BUILD_TYPE": "debug",
+        "SdkRootDirPath": "$env{SdkRootDirPath}/mcuxsdk",
+        "CONFIG_TOOLCHAIN": "armgcc",
+        "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "$env{binaryDir}",
+        "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "$env{binaryDir}",
+        "CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "$env{binaryDir}",
+        "WEST": "TRUE",
+        "board": "frdmmcxn947",
+        "core_id": "cm33_core0",
+        "PrjRootDirPath": "${fileDir}//"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "release",
+      "generator": "Ninja",
+      "binaryDir": "${fileDir}//${presetName}",
+      "toolchainFile": "$env{SdkRootDirPath}/mcuxsdk/cmake/toolchain/armgcc.cmake",
+      "inherits": "release-env",
+      "cacheVariables": {
+        "APP_DIR": {
+          "value": "${fileDir}",
+          "type": "PATH"
+        },
+        "CMAKE_BUILD_TYPE": "release",
+        "SdkRootDirPath": "$env{SdkRootDirPath}/mcuxsdk",
+        "CONFIG_TOOLCHAIN": "armgcc",
+        "CMAKE_RUNTIME_OUTPUT_DIRECTORY": "$env{binaryDir}",
+        "CMAKE_LIBRARY_OUTPUT_DIRECTORY": "$env{binaryDir}",
+        "CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "$env{binaryDir}",
+        "WEST": "TRUE",
+        "board": "frdmmcxn947",
+        "core_id": "cm33_core0",
+        "PrjRootDirPath": "${fileDir}//"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "displayName": "debug",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "release",
+      "displayName": "release",
+      "configurePreset": "release"
+    }
+  ]
+}
