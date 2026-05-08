@@ -16,10 +16,14 @@
     "mcuxpresso-tools.json": "jsonc"
   },
 
+  "//git": "MCUXpresso 拡張が各サンプル直下に作る __repo__/ には mcuxsdk / manifests のローカルクローンが入る。これを VS Code のソース管理が拾わないよう、サブフォルダのレポ自動検出を切る (ワークスペース直下のレポだけ表示)。",
+  "git.autoRepositoryDetection": "openEditors",
+
   "files.exclude": {
     "**/debug": true,
     "**/release": true,
     "**/flash_debug": true,
-    "**/flash_release": true
+    "**/flash_release": true,
+    "**/__repo__": true
   }
 }
